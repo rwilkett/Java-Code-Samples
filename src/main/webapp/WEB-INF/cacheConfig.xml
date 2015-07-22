@@ -1,0 +1,905 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:hz="http://www.hazelcast.com/schema/config"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd
+       http://www.springframework.org/schema/jee
+       http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+       http://www.hazelcast.com/schema/config
+       http://www.hazelcast.com/schema/config/hazelcast-spring.xsd">
+
+
+    <!-- This was taken from adonis on 2013-04-01. It is not complete and does not have the stuff from atlas
+    this is only here so that invalidations can happen on the api server, no caching is performed except on the clients
+    -->
+
+    <bean id="mapCacheKeyConfigurationFactory" class="com.bodybuilding.common.cache.util.SimpleMapCacheKeyConfigurationFactory">
+        <property name="config">
+            <map>
+                <!-- By default the cacheGenerator will use the method name as the area in which to cache.
+                    For example: if your call is /blog/getcategories, your area for that method call
+                    will become blog-getcategories.
+
+                    There may be cases where you want to exclude some parameters from being used in the generation
+                    of the cache key.  For those cases, something like this will work.
+
+                    NOTE: all parameter references should be LOWERCASE!!!
+                -->
+                <entry key="networks/getnetworkgyms">
+                    <map>
+                        <entry key="area" value="api-networks-getgymsbyuser"/>
+                    </map>
+                </entry>
+                <entry key="/workout/get">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="workout-get-[workoutid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/gettemplate">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="workout-gettemplate-[templateid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/getrollupstats">
+                    <map>
+                        <entry key="ttl" value="300"/>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="workout-getrollupstats-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/getworkoutsbyuser">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="workout-getworkoutsbyuser-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/add">
+                    <map>
+                        <entry key="setters" value="/workout/getworkoutsbyuser|userid,
+                                                            /workout/getrollupstats|userid,
+                                                            /workout/getstarteddate|userid,
+                                                            /workout/getworkoutcalendar|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/edit">
+                    <map>
+                        <entry key="setters" value="/workout/get|workoutid,
+                                                            /workout/getworkoutsbyuser|userid,
+                                                            /workout/getrollupstats|userid,
+                                                            /workout/getstarteddate|userid,
+                                                            /workout/getworkoutcalendar|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/getworkoutsbyuser">
+                    <map>
+                        <entry key="ttl" value="300"/>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="workout-getworkoutsbyuser-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/delete">
+                    <map>
+                        <entry key="setters" value="/workout/getworkoutsbyuser|userid,
+                                                            /workout/getrollupstats|userid,
+                                                            /workout/get|workoutid,
+                                                            /workout/getstarteddate|userid,
+                                                            /workout/getworkoutcalendar|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/getworkoutcalendar">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="workout-getworkoutcalendar-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/getfacets">
+                    <map>
+                        <entry key="disabled" value="true"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/addtemplate">
+                    <map>
+                        <entry key="setters" value="/workout/gettemplatesbyuser|userid,
+                                                            /workout/getrollupstats|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/addtemplatefromworkout">
+                    <map>
+                        <entry key="setters" value="/workout/gettemplatesbyuser|userid,
+                                                            /workout/getrollupstats|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/addtemplatefromtemplate">
+                    <map>
+                        <entry key="setters" value="/workout/gettemplatesbyuser|userid,
+                                                            /workout/getrollupstats|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/edittemplate">
+                    <map>
+                        <entry key="setters" value="/workout/gettemplate|templateid,
+                                                            /workout/gettemplatesbyuser|userid,
+                                                            /workout/getrollupstats|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/deletetemplate">
+                    <map>
+                        <entry key="setters" value="/workout/gettemplate|templateid,
+                                                            /workout/gettemplatesbyuser|userid,
+                                                            /workout/getrollupstats|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/gettemplatesbyuser">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="workout-gettemplatesbyuser-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/workout/search">
+                    <map>
+                        <entry key="disabled" value="true"/>
+                    </map>
+                </entry>
+
+                <entry key="/profile/get">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="profile-get-[userid]"/>
+                        <entry key="alt" value="userid=slug"/>
+                        <entry key="altArea" value="profile-get-[]" />
+                        <entry key="disabled" value="true" />
+                    </map>
+                </entry>
+
+                <entry key="/profile/set">
+                    <map>
+                        <entry key="setters" value="/profile/get|userid,/rightsidebar/getinfo|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/profile/create">
+                    <map>
+                        <entry key="setters" value=""/>
+                    </map>
+                </entry>
+
+                <entry key="/profile/updateprofileviews">
+                    <map>
+                        <entry key="setters" value=""/>
+                    </map>
+                </entry>
+
+                <entry key="/profile/updateprofileviews/">
+                    <map>
+                        <entry key="setters" value=""/>
+                    </map>
+                </entry>
+
+                <entry key="/feeds/getmain">
+                    <map>
+                        <entry key="ttl" value="300"/>
+                    </map>
+                </entry>
+
+                <entry key="/feeds/getfeed">
+                    <map>
+                        <entry key="ttl" value="300"/>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="feeds-getfeed-[asuserid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/feeds/createfeedentity">
+                    <map>
+                        <entry key="ttl" value="300"/>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="feeds-createfeedentity-[asuserid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/feeds/getnewmain">
+                    <map>
+                        <entry key="ttl" value="300"/>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="feeds-getfeed-[asuserid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/comments-api/get">
+                    <map>
+                        <entry key="ttl" value="300"/>
+                        <entry key="area" value="commentsapi-get-[entityId]"/>
+                        <entry key="oneToMany" value="true"/>
+                    </map>
+                </entry>
+                <entry key="/comments-api/add">
+                    <map>
+                        <entry key="setters" value="/feeds/getfeed|asuserid=userid,/feeds/getnewmain|asuserid=userid,
+                                /comments-api/get|entityId=entityid,/feeds/createfeedentity|asuserid=userid"/>
+                    </map>
+                </entry>
+                <entry key="/comments-api/reply">
+                    <map>
+                        <entry key="setters" value="/feeds/getfeed|asuserid=userid,/feeds/getnewmain|asuserid=userid,
+                                /comments-api/get|entityId=entityid,/feeds/createfeedentity|asuserid=userid"/>
+                    </map>
+                </entry>
+                <entry key="/comments-api/delete">
+                    <map>
+                        <entry key="setters" value="/feeds/getfeed|asuserid=userid,/feeds/getnewmain|asuserid=userid,
+                                /comments-api/get|entityId=entityid,/feeds/createfeedentity|asuserid=userid"/>
+                    </map>
+                </entry>
+                <entry key="/comments-api/moderate">
+                    <map>
+                        <entry key="setters" value="/feeds/getfeed|asuserid=userid,/feeds/getnewmain|asuserid=userid,
+                                /comments-api/get|entityId=entityid,/feeds/createfeedentity|asuserid=userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/motivation/set">
+                    <map>
+                        <entry key="setters" value="/motivation-get|userid,/profile/get|userid,/rightsidebar/getinfo|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/motivation/get">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="motivation-get-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/comments/get">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="comments-get-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/comments/set">
+                    <map>
+                        <entry key="setters" value="/comments/get|userid,/profile/get|userid,/rightsidebar/getinfo|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/fitstatus/set">
+                    <map>
+                        <entry key="setters" value="/fitstatus/get|userid,/comments/get|userid,/profile/get|userid,/rightsidebar/getinfo|userid"/>
+                    </map>
+                </entry>
+
+
+                <entry key="/friends/isfollower">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="friends-isfollower-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/isfriendrequestpending">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="friends-isfriendrequestpending-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/isfriend">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="friends-isfriend-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/get">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="friends-get-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/getfriends">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="friends-get-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/getfollowing">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="friends-getfollowing-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/getfriendrequests">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="friends-getfriendrequests-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/getfollowers">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="friends-getfollowers-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/follow">
+                    <map>
+                        <entry key="setters" value="/friends/getfollowing|userid,
+                                                            /friends/getfollowers|userid=friendid,
+                                                            /friends/isfollower|userid,
+                                                            /friends/isfollower|userid=friendid,
+                                                            /profile/get|userid,/rightsidebar/getinfo|userid,
+                                                            /profile/get|userid,/rightsidebar/getinfo|userid=friendid"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/removefollower">
+                    <map>
+                        <entry key="setters" value="/friends/getfollowing|userid,
+                                                            /friends/getfollowers|userid=friendid,
+                                                            /friends/isfollower|userid,
+                                                            /friends/isfollower|userid=friendid,
+                                                            /profile/get|userid,/rightsidebar/getinfo|userid,
+                                                            /profile/get|userid,/rightsidebar/getinfo|userid=friendid"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/addfriend">
+                    <map>
+                        <entry key="setters" value="/friends/getfriends|userid,
+                                                            /friends/getfriends|userid=friendid,
+                                                            /friends/getfriendrequests|userid,
+                                                            /friends/getfriendrequests|userid=friendid,
+                                                            /friends/isfriendrequestpending|userid,
+                                                            /friends/isfriendrequestpending|userid=friendid,
+                                                            /friends/isfriend|userid,
+                                                            /friends/isfriend|userid=friendid,
+                                                            /friends/isfollower|userid,
+                                                            /friends/isfollower|userid=friendid,
+                                                            /profile/get|userid,/rightsidebar/getinfo|userid,
+                                                            /profile/get|userid,/rightsidebar/getinfo|userid=friendid"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/acceptfriendrequests">
+                    <map>
+                        <entry key="setters" value="/friends/getfriends|userid,
+                                                            /friends/getfriends|userid=friendid,
+                                                            /friends/getfriendrequests|userid,
+                                                            /friends/getfriendrequests|userid=friendid,
+                                                            /friends/isfriendrequestpending|userid,
+                                                            /friends/isfriendrequestpending|userid=friendid,
+                                                            /friends/isfriend|userid,
+                                                            /friends/isfriend|userid=friendid,
+                                                            /friends/isfollower|userid,
+                                                            /friends/isfollower|userid=friendid,
+                                                            /profile/get|userid,/rightsidebar/getinfo|userid,
+                                                            /profile/get|userid,/rightsidebar/getinfo|userid=friendid"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/ignorefriend">
+                    <map>
+                        <entry key="setters" value="/friends/getfriends|userid,
+                                                            /friends/getfriends|userid=friendid,
+                                                            /friends/getfriendrequests|userid,
+                                                            /friends/getfriendrequests|userid=friendid,
+                                                            /friends/isfriendrequestpending|userid,
+                                                            /friends/isfriendrequestpending|userid=friendid,
+                                                            /friends/isfriend|userid,
+                                                            /friends/isfriend|userid=friendid,
+                                                            /friends/isfollower|userid,
+                                                            /friends/isfollower|userid=friendid,
+                                                            /profile/get|userid,/rightsidebar/getinfo|userid,
+                                                            /profile/get|userid,/rightsidebar/getinfo|userid=friendid"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/ignoreallfriends">
+                    <map>
+                        <entry key="setters" value="/friends/getfriends|userid,
+                                                                /friends/getfriends|userid=friendid,
+                                                                /friends/getfriendrequests|userid,
+                                                                /friends/getfriendrequests|userid=friendid,
+                                                                /friends/isfriendrequestpending|userid,
+                                                                /friends/isfriendrequestpending|userid=friendid,
+                                                                /friends/isfriend|userid,
+                                                                /friends/isfriend|userid=friendid,
+                                                                /friends/isfollower|userid,
+                                                                /friends/isfollower|userid=friendid,
+                                                                /profile/get|userid,/rightsidebar/getinfo|userid,
+                                                                /profile/get|userid,/rightsidebar/getinfo|userid=friendid"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/set">
+                    <map>
+                        <entry key="setters" value="/friends/getfriends|userid,
+                                                            /friends/getfriends|userid=friendid,
+                                                            /friends/getfriendrequests|userid,
+                                                            /friends/getfriendrequests|userid=friendid,
+                                                            /friends/isfriendrequestpending|userid,
+                                                            /friends/isfriendrequestpending|userid=friendid,
+                                                            /friends/isfriend|userid,
+                                                            /friends/isfriend|userid=friendid,
+                                                            /friends/isfollower|userid,
+                                                            /friends/isfollower|userid=friendid,
+                                                            /profile/get|userid,/rightsidebar/getinfo|userid,
+                                                            /profile/get|userid,/rightsidebar/getinfo|userid=friendid"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/set">
+                    <map>
+                        <entry key="setters" value="/friends/getfriends|userid,
+                                                        /friends/getfriends|userid=friendid,
+                                                        /friends/getfriendrequests|userid,
+                                                        /friends/getfriendrequests|userid=friendid,
+                                                        /friends/isfriendrequestpending|userid,
+                                                        /friends/isfriendrequestpending|userid=friendid,
+                                                        /friends/isfriend|userid,
+                                                        /friends/isfriend|userid=friendid,
+                                                        /friends/isfollower|userid,
+                                                        /friends/isfollower|userid=friendid,
+                                                        /profile/get|userid,/rightsidebar/getinfo|userid,
+                                                        /profile/get|userid,/rightsidebar/getinfo|userid=friendid"/>
+                    </map>
+                </entry>
+
+                <entry key="/friends/removefriend">
+                    <map>
+                        <entry key="setters" value="/friends/getfriends|userid,
+                                                        /friends/getfriends|userid=friendid,
+                                                        /friends/getfriendrequests|userid,
+                                                        /friends/getfriendrequests|userid=friendid,
+                                                        /friends/isfriendrequestpending|userid,
+                                                        /friends/isfriendrequestpending|userid=friendid,
+                                                        /friends/isfriend|userid,
+                                                        /friends/isfriend|userid=friendid,
+                                                        /friends/isfollower|userid,
+                                                        /friends/isfollower|userid=friendid,
+                                                        /profile/get|userid,/rightsidebar/getinfo|userid,
+                                                        /profile/get|userid,/rightsidebar/getinfo|userid=friendid"/>
+                    </map>
+                </entry>
+
+
+                <entry key="/stats/get">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="stats-get-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/stats/gethistory">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="stats-get-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/stats/set">
+                    <map>
+                        <entry key="setters" value="/stats/get|userid,/profile/get|userid,/rightsidebar/getinfo|userid,/bodystats/getbodystatdifference|userid" />
+                    </map>
+                </entry>
+
+                <entry key="/bodystats/getbodystatdifference">
+                    <map>
+                        <entry key="oneToMany" value="true" />
+                        <entry key="area" value="bodystats-getbodystatdifference-[userid]" />
+                    </map>
+                </entry>
+
+                <entry key="/stats/setgoal">
+                    <map>
+                        <entry key="setters" value="/stats/get|userid,/profile/get|userid,/rightsidebar/getinfo|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/gallery/getbyuser">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="gallery-get-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/gallery/getphoto">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="gallery-getphoto-[photoid]"/>
+                        <entry key="ttl" value="300"/>
+                    </map>
+                </entry>
+
+                <entry key="/gallery/getfeedback">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="gallery-getphoto-[photoid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/photos/deleteprogresspic">
+                    <map>
+                        <entry key="setters"
+                               value="/photos/getbeforeafter|userid,/photos/getprogresspics|userid,/photos/getprogresspic|photoid"/>
+                    </map>
+                </entry>
+
+                <entry key="/photos/editprogresspic">
+                    <map>
+                        <entry key="setters"
+                               value="/photos/getbeforeafter|userid,/photos/getprogresspics|userid,/photos/getprogresspic|photoid"/>
+                    </map>
+                </entry>
+
+                <entry key="/photos/getprogresspics">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="photos-getprogresspics-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/photos/getprofilepic">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="photos-getprofilepics-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/photos/getallprofilepics">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="photos-getprofilepics-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/photos/deleteprofilepic">
+                    <map>
+                        <entry key="setters"
+                               value="/photos/getbeforeafter|userid,/profile/get|userid,/rightsidebar/getinfo|userid,/photos/getprofilepic|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/photos/getbeforeafter">
+                    <map>
+                        <entry key="oneToMany" value="true" />
+                        <entry key="area" value="photos-getbeforeafter-[userid]" />
+                    </map>
+                </entry>
+
+                <entry key="/photos/setbeforeafter">
+                    <map>
+                        <entry key="setters"
+                               value="/photos/getbeforeafter|userid,/photos/getprogresspics|userid,/photos/getprogresspic|photoid"/>
+                    </map>
+                </entry>
+
+                <entry key="/photos/moderatebanner">
+                    <map>
+                        <entry key="setters" value="/profile/get|userid" />
+                    </map>
+                </entry>
+
+                <entry key="/photos/upload">
+                    <map>
+                        <entry key="setters" value="/gallery/getbyuser|userid" />
+                    </map>
+                </entry>
+
+
+                <entry key="/blog/getentries">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="blog-getentries-[blogHandle]"/>
+                        <entry key="ttl" value="300"/>
+                    </map>
+                </entry>
+
+                <entry key="/inspiration/getinspirational">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="inspiration-getinspirational-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/inspiration/getinspired">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="inspiration-getinspired-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/forum/getlatestposts">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="forum-getlatestposts-[forumuserid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/myprograms/get">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="myprograms-get-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/myprograms/set">
+                    <map>
+                        <entry key="setters" value="/myprograms/get|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/myprograms/delete">
+                    <map>
+                        <entry key="setters" value="/myprograms/get|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/profilevideo/get">
+                    <map>
+                        <entry key="ttl" value="300"/>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="profilevideo-get-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/profilevideo/getmostpopular">
+                    <map>
+                        <entry key="ttl" value="300"/>
+                        <entry key="oneToMany" value="true"/>
+                    </map>
+                </entry>
+
+                <entry key="/tooltip/get/all">
+                    <map>
+                        <entry key="ttl" value="50"/>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="tooltip-get-all-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/tooltip/close">
+                    <map>
+                        <entry key="setters" value="/tooltip/get/all|userid"/>
+                    </map>
+                </entry>
+                <!-- maybe we should cache this on the service side, every thing for action items throws feed event
+                and that could invalidate cache -->
+                <entry key="/actionitems/get">
+                    <map>
+                        <entry key="ttl" value="3600"/>
+                        <entry key="oneToMany" value="false"/>
+                        <entry key="area" value="actionitems-[userid]"/>
+                    </map>
+                </entry>
+                <entry key="/actionitems/getsettings">
+                    <map>
+                        <entry key="ttl" value="1"/>
+                        <entry key="oneToMany" value="false"/>
+                        <entry key="area" value="actionitems-[userid]"/>
+                    </map>
+                </entry>
+                <entry key="/actionitems/setsettings">
+                    <map>
+                        <entry key="setters" value="/actionitems/getsettings|userid,/actionitems/get|userid,/rightsidebar/getinfo|userid"/>
+                    </map>
+                </entry>
+
+
+                <entry key="/alert/get">
+                    <map>
+                        <entry key="ttl" value="150"/>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="alert-get-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/alert/delete">
+                    <map>
+                        <entry key="ttl" value="1"/>
+                        <entry key="setters" value="/alert/get|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/alert/disable">
+                    <map>
+                        <entry key="ttl" value="1"/>
+                        <entry key="setters" value="/alert/get|userid,/alert/getunreadcount|userid,/rightsidebar/getinfo|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/alert/removebefore">
+                    <map>
+                        <entry key="ttl" value="1"/>
+                        <entry key="setters" value="/alert/get|userid,/alert/getunreadcount|userid,/rightsidebar/getinfo|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/alert/markasread">
+                    <map>
+                        <entry key="ttl" value="1"/>
+                        <entry key="setters" value="/alert/get|userid,/alert/getunreadcount|userid,/rightsidebar/getinfo|userid"/>
+                    </map>
+                </entry>
+                <entry key="/alert/getunreadcount">
+                    <map>
+                        <entry key="ttl" value="150"/>
+                    </map>
+                </entry>
+                <entry key="/alert/getsettings">
+                    <map>
+                        <entry key="ttl" value="1"/>
+                    </map>
+                </entry>
+                <entry key="/alert/savesettings">
+                    <map>
+                        <entry key="ttl" value="1"/>
+                        <entry key="setters" value="/alert/get|userid,/alert/getunreadcount|userid,/rightsidebar/getinfo|userid,/alert/getsettings|userid"/>
+                    </map>
+                </entry>
+
+                <entry key="/bodygroups/declineinvites">
+                    <map>
+                        <entry key="setters" value="/bodygroups/getinvites|userid,/bodygroups/getrequestsandinvites|userid,/rightsidebar/getinfo|userid"/>
+                    </map>
+                </entry>
+                <entry key="/bodygroups/getinvites">
+                    <map>
+                        <entry key="ttl" value="300"/>
+                        <entry key="area" value="bg-requests-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/bodygroups/getrequestsandinvites">
+                    <map>
+                        <entry key="ttl" value="300"/>
+                        <entry key="area" value="bg-requests-[userid]"/>
+                    </map>
+                </entry>
+                <entry key="/rightsidebar/getinfo">
+                    <map>
+                        <entry key="ttl" value="120"/>
+                    </map>
+                </entry>
+                <entry key="/liking/set">
+                    <map>
+                        <entry key="setters" value="/feeds/getfeed|asuserid=userid,/feeds/getnewmain|asuserid=userid,
+                                    /feeds/getfeed|asuserid=ownerid,/feeds/getnewmain|asuserid=ownerid,/liking/get|entityid,
+                                    /liking/getuserswholikeentity|entityid, /liking/getlikeableentitydata|entityid,
+                                    /liking/getbatchlikeableentitydata|type, /liking/getlikesbyentity|entityid,
+                                    /feeds/createfeedentity|asuserid=userid, /liking/getlikesbyentities|cacheid=entityid,
+                                    /liking/getcountsbyentities|cacheid=entityid"/>
+                    </map>
+                </entry>
+                <entry key="/liking/delete">
+                    <map>
+                        <entry key="setters" value="/feeds/getfeed|asuserid=userid,/feeds/getnewmain|asuserid=userid,
+                                    /feeds/getfeed|asuserid=ownerid,/feeds/getnewmain|asuserid=ownerid,/liking/get|entityid,
+                                    /liking/getuserswholikeentity|entityid, /liking/getlikeableentitydata|entityid,
+                                    /liking/getlikesbyentity|entityid,/feeds/createfeedentity|asuserid=userid,
+                                    /liking/getlikesbyentities|cacheid=entityid,/liking/getcountsbyentities|cacheid=entityid,
+                                    /liking/getbatchlikeableentitydata|type"/>
+                    </map>
+                </entry>
+                <entry key="/liking/get">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="liking-get-[entityid]"/>
+                    </map>
+                </entry>
+                <entry key="/liking/getlikeableentitydata">
+                    <map>
+                        <entry key="ttl" value="300"/>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="liking-getlikeableentitydata-[entityid]"/>
+                    </map>
+                </entry>
+                <entry key="/liking/getbatchlikeableentitydata">
+                    <map>
+                        <entry key="ttl" value="300"/>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="liking-getbatchlikeableentitydata-[type]"/>
+                    </map>
+                </entry>
+                <entry key="/liking/getuserswholikeentity">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="liking-getuserswholiked-[entityid]"/>
+                    </map>
+                </entry>
+                <entry key="/liking/getlikesbyentities">
+                    <map>
+                        <!-- we dont cache for long, this is a hard key to invalidate -->
+                        <!-- if a page is very popular this little bit helps, this call seems pretty fast anyway -->
+                        <entry key="ttl" value="5"/>
+                    </map>
+                </entry>
+
+                <entry key="/liking/getcountsbyentities">
+                    <map>
+                        <!-- we dont cache for long, this is a hard key to invalidate -->
+                        <!-- if a page is very popular this little bit helps, this call seems pretty fast anyway -->
+                        <entry key="ttl" value="5"/>
+                    </map>
+                </entry>
+                <!-- End liking entries -->
+
+                <entry key="/goals/getcurrentbyuser">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="goals-getcurrentbyuser-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/goals/getprogressforcurrentgoal">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="goals-getprogressforcurrentgoal-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/goals/deleteforuser">
+                    <map>
+                        <entry key="setters"
+                               value="/goals/getcurrentbyuser|userid,/stats/get|userid,/goals/getprogressforcurrentgoal|userid,/bodystats/getbodystatdifference|userid,/goals/getgoalachievementrate|userid" />
+                    </map>
+                </entry>
+
+                <entry key="/goals/save">
+                    <map>
+                        <entry key="setters"
+                               value="/goals/getcurrentbyuser|userid,/stats/get|userid,/goals/getprogressforcurrentgoal|userid,/bodystats/getbodystatdifference|userid" />
+                    </map>
+                </entry>
+
+                <entry key="/educationengine/geteducationpreferences">
+                    <map>
+                        <entry key="oneToMany" value="true"/>
+                        <entry key="area" value="education-geteducationpreferences-[userid]"/>
+                    </map>
+                </entry>
+
+                <entry key="/educationengine/saveeducationpreference">
+                    <map>
+                        <entry key="setters"
+                               value="/educationengine/geteducationpreferences|userid" />
+                    </map>
+                </entry>
+
+            </map>
+        </property>
+    </bean>
+</beans>

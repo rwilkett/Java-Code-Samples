@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean class="com.bodybuilding.content.model.util.CategorySettings" id="categorySettings">
+        <property name="excludedCategoryPages">
+            <set>
+                <value>http://www.bodybuilding.com/fun/bbmainnut.htm</value>
+                <value>http://www.bodybuilding.com/fun/bbmaintrain.htm</value>
+                <value>http://www.bodybuilding.com/fun/bbmainsports.htm</value>
+                <value>http://www.bodybuilding.com/fun/bbmainsupp.htm</value>
+                <value>http://www.bodybuilding.com/fun/bbmaincont.htm</value>
+                <value>http://www.bodybuilding.com/fun/bbmainmind.htm</value>
+            </set>
+        </property>
+        <property name="writerCategorySettings">
+            <map>
+                <entry key="http://www.bodybuilding.com/fun/newbbmain.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Full Writer Listing! Learn How To Train For the Most Gains!"/>
+                        <property name="categoryImage" value=""/>
+                        <property name="selector" value="all-writers"/>
+                        <property name="categoryName" value="none"/>
+                        <property name="authorGender" value="NONE"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmainmen.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Our full listing of male writers! These men know what they are doing."/>
+                        <property name="categoryImage" value="newbbmainmen.gif"/>
+                        <property name="selector" value="writers-all-men"/>
+                        <property name="categoryName" value="none"/>
+                        <property name="authorGender" value="MEN"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmainwomen.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Our full listing of female writers! These women know what they are doing."/>
+                        <property name="categoryImage" value="newbbmainwomen.gif"/>
+                        <property name="selector" value="writers-all-women"/>
+                        <property name="categoryName" value="none"/>
+                        <property name="authorGender" value="WOMEN"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmainpow.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Our full listing of powerlifter/strongman writers. Learn how to get huge and strong!"/>
+                        <property name="categoryImage" value="newbbmainpower.gif"/>
+                        <property name="selector" value="writers-powerlifters-strongman"/>
+                        <property name="categoryName" value="powerliftersStrongmen"/>
+                        <property name="authorGender" value="MEN"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmainfig.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Our full listing of fitness and figure expert writers. Learn the secrets!"/>
+                        <property name="categoryImage" value="newbbmainfitness.gif"/>
+                        <property name="selector" value="fitness-figure"/>
+                        <property name="categoryName" value="fitnessFigure"/>
+                        <property name="authorGender" value="WOMEN"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmaincompm.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Our full listing of male competitive bodybuilder writers. Learn how to get huge and become a competitor!"/>
+                        <property name="categoryImage" value="newbbmaincompm.gif"/>
+                        <property name="selector" value="writers-competitive-bodybuilders-men"/>
+                        <property name="categoryName" value="competitiveBodybuilders"/>
+                        <property name="authorGender" value="MEN"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmaincompf.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Our full listing of female competitive bodybuilder writers. Learn how to get cut and become a competitor!"/>
+                        <property name="categoryImage" value="newbbmaincompf.gif"/>
+                        <property name="selector" value="writers-competitive-bodybuilders-women"/>
+                        <property name="categoryName" value="competitiveBodybuilders"/>
+                        <property name="authorGender" value="WOMEN"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmainsports.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Our full listing of sports-related writers! Find out how to get better for your sport!"/>
+                        <property name="categoryImage" value="newbbmainsports.gif"/>
+                        <property name="selector" value="writers-sports"/>
+                        <property name="categoryName" value="sports"/>
+                        <property name="authorGender" value="NONE"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmainmod.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle" value="Bodybuilding.com - Writer Listing: Modeling Experts!"/>
+                        <property name="categoryImage" value="newbbmainmodels.gif"/>
+                        <property name="selector" value="modeling-experts"/>
+                        <property name="categoryName" value="sports"/>
+                        <property name="authorGender" value="NONE"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmainm40.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Our full listing of over 40 male writers. How do they do it?"/>
+                        <property name="categoryImage" value="newbbmainm40.gif"/>
+                        <property name="selector" value="writers-over40-men"/>
+                        <property name="categoryName" value="over40"/>
+                        <property name="authorGender" value="MEN"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmainf40.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Our full listing of over 40 female writers. How do they do it?"/>
+                        <property name="categoryImage" value="newbbmainw40.gif"/>
+                        <property name="selector" value="writers-over40-women"/>
+                        <property name="categoryName" value="over40"/>
+                        <property name="authorGender" value="WOMEN"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmainmdiet.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Our full listing of male diet/nutrition expert writers. Learn the secrets to nutrition!"/>
+                        <property name="categoryImage" value="newbbmaindiet.gif"/>
+                        <property name="selector" value="writers-diet-and-nutrition-experts-men"/>
+                        <property name="categoryName" value="dietNutritionExperts"/>
+                        <property name="authorGender" value="MEN"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmainfdiet.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Our full listing of female diet/nutrition expert writers. Learn the secrets to nutrition!"/>
+                        <property name="categoryImage" value="newbbmaindiet.gif"/>
+                        <property name="selector" value="writers-diet-and-nutrition-experts-women"/>
+                        <property name="categoryName" value="dietNutritionExperts"/>
+                        <property name="authorGender" value="WOMEN"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmainteen.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Our full listing of teen writers. Be the biggest at your school!"/>
+                        <property name="categoryImage" value="newbbmainteen.gif"/>
+                        <property name="selector" value="writers-teen-bodybuilding"/>
+                        <property name="categoryName" value="teens"/>
+                        <property name="authorGender" value="NONE"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmainte.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Our full listing of training expert writers. Learn the secrets to training!"/>
+                        <property name="categoryImage" value="newbbmainte.gif"/>
+                        <property name="selector" value="training-experts"/>
+                        <property name="categoryName" value="trainingExperts"/>
+                        <property name="authorGender" value="NONE"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmainpro.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Our full listing of pro bodybuilder writers. Learn the secrets of the pros!"/>
+                        <property name="categoryImage" value="newbbmainpro.gif"/>
+                        <property name="selector" value="writers-professional-bodybuilders"/>
+                        <property name="categoryName" value="proBodybuilders"/>
+                        <property name="authorGender" value="NONE"/>
+                    </bean>
+                </entry>
+
+                <entry key="http://www.bodybuilding.com/fun/newbbmaintrans.htm">
+                    <bean class="com.bodybuilding.content.model.dto.AuthorCategoryDTO">
+                        <property name="pageTitle"
+                                  value="Bodybuilding.com - Our full listing of transformation expert writers. Learn the secrets to amazing transformations!"/>
+                        <property name="categoryImage" value="newbbmaintrans.gif"/>
+                        <property name="selector" value="writers-transformations"/>
+                        <property name="categoryName" value="transformations"/>
+                        <property name="authorGender" value="NONE"/>
+                    </bean>
+                </entry>
+
+            </map>
+        </property>
+    </bean>
+
+</beans>

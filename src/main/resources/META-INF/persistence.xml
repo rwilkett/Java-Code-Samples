@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+
+
+    <persistence-unit name="writersPU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+        <class>com.bodybuilding.content.model.article.Article</class>
+        <class>com.bodybuilding.content.model.author.Author</class>
+        <class>com.bodybuilding.content.model.author.AuthorMainPage</class>
+        <class>com.bodybuilding.content.model.author.AuthorCategory</class>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+            <property name="hibernate.hbm2ddl.auto" value="validate" />
+        </properties>
+    </persistence-unit>
+
+    <persistence-unit name="products">
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+        <class>com.bodybuilding.content.model.product.Brand</class>
+        <class>com.bodybuilding.content.model.product.Page</class>
+        <class>com.bodybuilding.content.model.product.Product</class>
+        <class>com.bodybuilding.content.model.product.SEOMapping</class>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+            <property name="hibernate.hbm2ddl.auto" value="validate" />
+        </properties>
+    </persistence-unit>
+
+    <persistence-unit name="productsPU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+            <property name="hibernate.hbm2ddl.auto" value="validate" />
+        </properties>
+    </persistence-unit>
+
+    <persistence-unit name="bbInfoPU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+        </properties>
+    </persistence-unit>
+
+    <persistence-unit name="bbInfo2PU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+        </properties>
+    </persistence-unit>
+
+    <persistence-unit name="employeesPU">
+        <properties>
+            <property name="hibernate.cache.provider_class"
+                      value="net.sf.ehcache.hibernate.SingletonEhCacheProvider" />
+            <property name="hibernate.cache.provider_configuration" value="/ehcache.xml" />
+            <property name="hibernate.cache.use_query_cache" value="false" />
+            <property name="hibernate.cache.use_second_level_cache"
+                      value="false" />
+            <property name="hibernate.generate_statistics" value="false" />
+            <property name="hibernate.cache.use_structured_entries"
+                      value="false" />
+
+            <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
+            <property name="hibernate.connection.password" value="${jdbc.password}"/>
+            <property name="hibernate.connection.url" value="${employees.jdbc.url}"/>
+            <property name="hibernate.connection.username" value="${jdbc.username}"/>
+            <property name="hibernate.connection.autoReconnect" value="true"/>
+
+            <property name="hibernate.show_sql" value="false" />
+            <property name="hibernate.format_sql" value="false" />
+            <property name="hibernate.jdbc.batch_size" value="100" />
+            <property name="hibernate.connection.pool_size" value="5" />
+        </properties>
+    </persistence-unit>
+
+    <persistence-unit name="amateursPU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+            <property name="hibernate.hbm2ddl.auto" value="validate" />
+        </properties>
+    </persistence-unit>
+
+</persistence>

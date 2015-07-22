@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+          http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+          http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+          http://www.springframework.org/schema/util
+          http://www.springframework.org/schema/util/spring-util-3.2.xsd"
+        >
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+
+    <bean id="placeholderConfigurer"
+          class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="false"/>
+        <property name="ignoreResourceNotFound" value="false"/>
+        <property name="localOverride" value="true"/>
+        <property name="locations">
+            <list>
+                <value>classpath*:/common.properties</value>
+                <value>classpath*:/api_content/database.properties</value>
+            </list>
+        </property>
+        <property name="order" value="0"/>
+    </bean>
+
+    <context:annotation-config/>
+    <context:component-scan base-package="com.bodybuilding.content" annotation-config="true" />
+    <!--<context:component-scan base-package="com.bodybuilding.common.cache" annotation-config="true" />-->
+    <context:component-scan base-package="com.bodybuilding.api" annotation-config="true"/>
+
+    <bean id="swaggerResourceJSON" class="com.wordnik.swagger.jaxrs.listing.ApiListingResourceJSON" />
+    <bean id="resourceWriter" class="com.wordnik.swagger.jaxrs.listing.ResourceListingProvider" />
+    <bean id="apiWriter" class="com.wordnik.swagger.jaxrs.listing.ApiDeclarationProvider" />
+
+    <jaxrs:server id="restContainer" address="/">
+        <jaxrs:serviceBeans>
+            <ref bean="articles"/>
+            <ref bean="authors"/>
+            <ref bean="swaggerResourceJSON" />
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <bean class="com.bodybuilding.api.providers.AuthorCategoryNameConverterProvider"/>
+            <bean class="com.bodybuilding.api.providers.AuthorGenderParamHandler" />
+            <bean class="com.bodybuilding.api.JSONExceptionProvider"/>
+            <bean class="com.bodybuilding.api.JSONProvider"/>
+            <bean class="com.bodybuilding.api.providers.YesNoParamHandler"/>
+            <bean class="com.bodybuilding.api.BBExceptionMapper"/>
+            <bean class="com.bodybuilding.api.BatchedRequestParamHandler"/>
+            <bean class="com.bodybuilding.api.CacheKeyParamHandler"/>
+            <ref bean="resourceWriter"/>
+            <ref bean="apiWriter"/>
+        </jaxrs:providers>
+    </jaxrs:server>
+
+    <bean id="swaggerConfig" class="com.wordnik.swagger.jaxrs.config.BeanConfig">
+        <property name="resourcePackage" value="com.bodybuilding.api.services"/>
+        <property name="version" value="1.0.0"/>
+        <property name="basePath" value="http://mobile-api.dev:8080/api-content"/>
+        <property name="title" value="Bodybuilding.com Content API"/>
+        <property name="description" value="RESTful Content API"/>
+        <property name="contact" value="ray.wilkett@bodybuilding.com"/>
+        <property name="license" value="Apache 2.0 License"/>
+        <property name="licenseUrl" value="http://www.apache.org/licenses/LICENSE-2.0.html"/>
+        <property name="scan" value="true"/>
+    </bean>
+
+    <bean id="wrapperCacheProvider" class="com.bodybuilding.common.cache.blocking.LocalBlockingDecorator">
+        <constructor-arg name="delegate" ref="ehcacheProvider"/>
+    </bean>
+
+    <bean id="jaxbXmlProvider" class="org.apache.cxf.jaxrs.provider.JAXBElementProvider">
+        <property name="jaxbElementClassMap" ref="propertiesMap"/>
+    </bean>
+
+    <util:map id="propertiesMap">
+        <entry key="jaxb.formatted.output">
+            <value type="java.lang.Boolean">true</value>
+        </entry>
+    </util:map>
+
+    <bean id="simpleThrottle" name="simpleThrottle" class="com.bodybuilding.api.utils.SimpleThrottle">
+        <constructor-arg name="duration" value="${liking.throttle.duration:60}" type="int" />
+        <constructor-arg name="size" value="${liking.throttle.size:60}" type="int" />
+    </bean>
+
+    <bean class="com.mchange.v2.c3p0.ComboPooledDataSource" id="writersDataSource">
+        <property name="driverClass" value="${databaseWriters.driverClassName}"/>
+        <property name="jdbcUrl" value="${databaseWriters.url}"/>
+        <property name="user" value="${databaseWriters.username}"/>
+        <property name="password" value="${databaseWriters.password}"/>
+        <property name="minPoolSize" value="5"/>
+        <property name="loginTimeout" value="300"/>
+        <property name="maxIdleTime" value="100"/>
+    </bean>
+
+
+    <bean class="org.springframework.orm.jpa.JpaTransactionManager" id="transactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="writersPU"/>
+        <property name="dataSource" ref="writersDataSource" />
+    </bean>
+
+    <!--<aop:aspectj-autoproxy proxy-target-class="true"/>-->
+
+    <!-- json 1st, then the json gets compressed -->
+    <bean id="jsonCache"  class="com.bodybuilding.common.cache.JsonCacheDecorator">
+        <constructor-arg name="delegate" ref="compressionCache"/>
+    </bean>
+
+    <bean id="compressionCache"  class="com.bodybuilding.common.cache.CompressionDecorator">
+        <constructor-arg name="delegate" ref="memcacheCache"/>
+        <!-- this bean is still here for a while so that stuff that was already compressed in cache can be decompressed-->
+        <!-- can probably remove bean at start of 2013 -->
+        <property name="disabled"  value="true"/>
+    </bean>
+
+    <bean id="memcacheConnectionFactory" class="com.bodybuilding.common.cache.BBMemcacheConnectionFactory">
+        <property name="maxReconnectDelay" value="${memcached.reconnectDelay:2}"/>
+        <property name="timeoutExceptionThreshold" value="${memcached.exceptionThreshold:20}"/>
+    </bean>
+
+    <bean id="memcacheCache" class="com.bodybuilding.common.cache.MemcacheProvider" destroy-method="shutdown">
+        <constructor-arg name="servers" value="${memcached.servers}" />
+        <constructor-arg name="connectionFactory" ref="memcacheConnectionFactory"/>
+    </bean>
+
+    <bean id="memcacheLockProvider" class="com.bodybuilding.common.memcached.MemcacheLockProvider" destroy-method="shutdown">
+        <constructor-arg value="${memcached.servers}"/>
+    </bean>
+
+    <!-- doesnt go through json / compression -->
+    <bean id="straightMemcacheBlocking" class="com.bodybuilding.common.cache.blocking.MemcacheBlockingDecorator">
+        <constructor-arg name="delegate" ref="memcacheCache"/>
+        <constructor-arg name="memcacheLockProvider" ref="memcacheLockProvider" />
+    </bean>
+
+    <bean id="ehcacheProvider" class="com.bodybuilding.common.cache.EhcacheProvider" destroy-method="destroy"/>
+
+
+
+    <bean id="throttleCache" name="throttleCache" class="com.bodybuilding.common.cache.blocking.MemcacheBlockingDecorator">
+        <constructor-arg name="delegate" ref="memcacheCache"/>
+        <constructor-arg name="memcacheLockProvider" ref="memcacheLockProvider" />
+    </bean>
+
+    <bean class="com.mchange.v2.c3p0.ComboPooledDataSource" id="bbInfoDataSource">
+        <property name="driverClass" value="${databaseBB.driverClassName}"/>
+        <property name="jdbcUrl" value="${databaseBB.url}"/>
+        <property name="user" value="${databaseBB.username}"/>
+        <property name="password" value="${databaseBB.password}"/>
+        <property name="minPoolSize" value="5"/>
+        <property name="loginTimeout" value="300"/>
+        <property name="maxIdleTime" value="100"/>
+    </bean>
+
+    <bean class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+          id="bbInfoEntityManagerFactory">
+        <property name="dataSource" ref="bbInfoDataSource"/>
+        <property name="persistenceUnitName" value="bbInfoPU"/>
+    </bean>
+
+    <bean class="com.mchange.v2.c3p0.ComboPooledDataSource" id="bbInfo2DataSource">
+        <property name="driverClass" value="${databaseBB2.driverClassName}"/>
+        <property name="jdbcUrl" value="${databaseBB2.url}"/>
+        <property name="user" value="${databaseBB2.username}"/>
+        <property name="password" value="${databaseBB2.password}"/>
+        <property name="autoCommitOnClose" value="false"/>
+        <property name="maxIdleTime" value="120"/>
+        <property name="maxPoolSize" value="20"/>
+        <property name="minPoolSize" value="2"/>
+    </bean>
+
+    <bean class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" id="bbInfo2EntityManagerFactory">
+        <property name="dataSource" ref="bbInfo2DataSource"/>
+        <property name="persistenceUnitName" value="bbInfo2PU"/>
+    </bean>
+
+    <bean class="org.springframework.orm.jpa.JpaTransactionManager" id="bbInfo2TransactionManager">
+        <property name="entityManagerFactory" ref="bbInfo2EntityManagerFactory"/>
+    </bean>
+
+    <bean id="productsDataSource" class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
+        <property name="targetDataSource" ref="realProductsDataSource"/>
+    </bean>
+
+    <bean id="realProductsDataSource" class="org.apache.tomcat.jdbc.pool.DataSource"  destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${products.jdbc.url}"/>
+        <property name="username" value="${products.jdbc.username}"/>
+        <property name="password" value="${products.jdbc.password}"/>
+        <property name="minIdle" value="${products.jdbc.minPoolSize}"/>
+        <property name="initialSize" value="${jdbc.minPoolSize}"/>
+        <property name="maxActive" value="${products.jdbc.maxPoolSize}"/>
+        <property name="validationQuery" value="SELECT 1"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="maxAge" value="${products.jdbc.maxConnectionAge}000"/> <!-- Convert from seconds in config, to milliseconds in bean. -->
+        <property name="maxIdle" value="${products.jdbc.maxIdle}"/>
+    </bean>
+
+    <bean id="productsTxManager"
+          class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="productsEntityManager"/>
+        <property name="dataSource" ref="productsDataSource"/>
+        <qualifier value="products"/>
+    </bean>
+
+    <bean id="productsEntityManager" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="productsDataSource"/>
+        <property name="persistenceUnitName" value="products"/>
+        <property name="jpaDialect">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+        </property>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <property name="database" value="${database}"/>
+                <property name="showSql" value="false"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean class="com.mchange.v2.c3p0.ComboPooledDataSource" id="amateursDataSource">
+        <property name="driverClass" value="${databaseAmateurs.driverClassName}"/>
+        <property name="jdbcUrl" value="${databaseAmateurs.url}"/>
+        <property name="user" value="${databaseAmateurs.username}"/>
+        <property name="password" value="${databaseAmateurs.password}"/>
+        <property name="minPoolSize" value="5"/>
+        <property name="loginTimeout" value="300"/>
+        <property name="maxIdleTime" value="100"/>
+    </bean>
+
+    <bean class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+            id="productsEntityManagerFactory">
+        <property name="dataSource" ref="productsDataSource"/>
+        <property name="persistenceUnitName" value="productsPU"/>
+    </bean>
+
+    <bean
+            class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+            id="amateurEntityManagerFactory">
+        <property name="dataSource" ref="amateursDataSource"/>
+        <property name="persistenceUnitName" value="amateursPU"/>
+    </bean>
+
+    <bean class="org.springframework.orm.jpa.JpaTransactionManager" id="amateurTransactionManager">
+        <property name="entityManagerFactory" ref="amateurEntityManagerFactory"/>
+    </bean>
+
+    <import resource="classpath*:/category-config*.xml"/>
+    <bean id="fileCacheKeyConfigFactory" class="com.bodybuilding.common.cache.util.FileCacheKeyConfigurationFactory">
+        <constructor-arg name="fileName" value="/etc/bbcom/commonCacheConfig.xml"/>
+    </bean>
+
+    <bean id="cacheKeyConfigFactory" class="com.bodybuilding.common.cache.util.FallbackCacheKeyConfigurationFactory">
+        <constructor-arg name="factories">
+            <list>
+                <ref bean="fileCacheKeyConfigFactory"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="cacheKeyGenerator" class="com.bodybuilding.common.cache.util.ReloadingCacheKeyGenerator">
+        <constructor-arg name="configurationFactory" ref="cacheKeyConfigFactory"/>
+    </bean>
+
+</beans>
